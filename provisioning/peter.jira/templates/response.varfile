@@ -1,0 +1,13 @@
+#install4j response file for JIRA Software 7.5.2
+#Mon Nov 13 23:59:51 UTC 2017
+launch.application$Boolean=false
+rmiPort$Long=8005
+app.jiraHome=/var/jira
+app.install.service$Boolean=true
+existingInstallationDir=/opt/jira
+sys.confirmedUpdateInstallationString=false
+sys.languageId=en
+sys.installationDir=/opt/jira
+executeLauncherAction$Boolean=true
+httpPort$Long=8080
+portChoice=default
