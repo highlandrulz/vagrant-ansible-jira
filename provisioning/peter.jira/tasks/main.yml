@@ -7,12 +7,6 @@
 - name: Install Java 8
   apt: name=oracle-java8-installer force=yes
 
-# Setup Jira user and group
-- name: Jira groups
-  group: name={{ jira_user_group }}
-- name: Default JIRA user and home
-  user: name={{ jira_user }} shell=/bin/bash group={{ jira_user_group }} home={{ jira_user_home_dir }}
-
 # Copy files into place
 - name: Copy Jira file
   copy: src=files/{{ jira_filename }}-{{ jira_version }}.bin dest={{ jira_user_home_dir }}/{{ jira_filename }}-{{ jira_version }}.bin 
@@ -33,14 +27,6 @@
   shell: "{{ jira_user_home_dir }}/{{ jira_filename }}-{{ jira_version }}.bin -q -varfile {{ jira_user_home_dir }}/response.varfile"
   when: not st.stat.exists
 
-#- name: Fix jira directory permissions
-#  file:
-#     path: "{{ jira_user_home_dir }}/{{ jira_extracted }}-{{ jira_version }}-standalone"
-#     owner: "{{ jira_user }}"
-#     group: "{{ jira_user_group }}"
-#     mode: 0755
-#     recurse: yes
-
 # Copy MySQL JDBC driver into place
 - name: Unarchive driver
   unarchive: src={{ jira_user_home_dir }}/mysql-connector-java-5.1.44.tar.gz dest={{ jira_user_home_dir }} copy=no
@@ -53,4 +39,4 @@
 
 # Start the Jira service
 - name: enable jira service
-  service: name=jira1 enabled=true state=started
+  service: name=jira enabled=true state=started
