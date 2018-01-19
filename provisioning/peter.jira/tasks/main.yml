@@ -1,15 +1,19 @@
 ---
-# Add Java dependancy for Jira
-- name: Add Java 8 repository
-  apt_repository: repo='ppa:webupd8team/java'
-- name: Agree to oracle license
-  debconf: name=oracle-java8-installer question=shared/accepted-oracle-license-v1-1 vtype=select value=true
-- name: Install Java 8
-  apt: name=oracle-java8-installer force=yes
-
 # Copy files into place
+- name: Check if Jira binary exists locally
+  local_action: stat path=files/{{ jira_filename }}-{{ jira_version }}.bin
+  register: filestatus_local
+- name: Check if Jira binary exists remotely
+  stat: path={{ jira_user_home_dir }}/{{ jira_filename }}-{{ jira_version }}.bin
+  register: filestatus_remote  
 - name: Copy Jira file
   copy: src=files/{{ jira_filename }}-{{ jira_version }}.bin dest={{ jira_user_home_dir }}/{{ jira_filename }}-{{ jira_version }}.bin 
+  when: filestatus_local.stat.exists
+- name: Download the Source
+  get_url: url={{ jira_download_link }}/{{ jira_filename }}-{{ jira_version }}.bin dest={{ jira_user_home_dir }}/{{ jira_filename }}-{{ jira_version }}.bin
+  when: 
+    - not filestatus_local.stat.exists
+    - not filestatus_remote.stat.exists
 - name: Make file executable
   file: 
     path: "{{ jira_user_home_dir }}/{{ jira_filename }}-{{ jira_version }}.bin"
@@ -36,6 +40,28 @@
 # Copy database configuration into place
 - name: Copy database file into place
   template: src=dbconfig.xml dest={{ jira_home }}
+
+# Start the Jira service
+- name: enable jira service
+  service: name=jira enabled=true state=started
+
+# Pause to allow Jira to initialise the database
+- name: Pause for 3 minutes to allow the database to be created
+  pause:
+    minutes: 3
+
+# Stop the Jira service
+- name: enable jira service
+  service: name=jira enabled=true state=stopped
+
+# Setup the last part of the Jira setup
+- name: Copy SQL file to host
+  copy: src=files/jirasetup.sql dest=/tmp/jirasetup.sql
+- name: Import file.sql similar to mysql -u <username> -p <password> < hostname.sql
+  mysql_db:
+    state: import
+    name: all
+    target: /tmp/jirasetup.sql
 
 # Start the Jira service
 - name: enable jira service
