@@ -1,11 +1,3 @@
-__author__ = "Suhail Nooristani"
-__copyright__ = "Copyright 2017, Suhail Nooristani"
-__credits__ = ["Suhail Nooristani"]
-__version__ = "1.0"
-__maintainer__ = "Suhail Nooristani"
-__email__ = "suhail.nooristani@rbc.com"
-__status__ = "Development"
-
 import requests
 import json
 import logging
